@@ -1,0 +1,171 @@
+# Atividade 4 — Modelagem de um Problema Real
+
+## Escolha da lista de compras com orçamento limitado
+
+### 1. Descrição do problema
+
+Um problema comum do cotidiano é decidir quais produtos comprar quando existe um orçamento limitado. Por exemplo, uma pessoa pode ter R$ 500,00 disponíveis para fazer as compras do mês, mas existir uma quantidade maior de produtos que ela gostaria de comprar.
+
+Cada produto possui um preço e um valor de utilidade. A utilidade representa o quanto aquele produto é importante ou desejável para a pessoa. O objetivo é escolher os produtos que proporcionem a maior utilidade possível sem ultrapassar o orçamento disponível.
+
+Esse problema pode ser aplicado a uma situação real de planejamento de compras, em que é necessário escolher entre diferentes produtos e priorizar os mais importantes.
+
+### 2. Modelagem formal
+
+#### O que é uma solução?
+
+Uma solução é representada por uma sequência de valores 0 e 1, em que cada posição corresponde a um produto.
+
+* `1` significa que o produto foi escolhido.
+* `0` significa que o produto não foi escolhido.
+
+Por exemplo, para 5 produtos, a solução `[1, 0, 1, 0, 1]` significa que os produtos 1, 3 e 5 foram escolhidos.
+
+#### Espaço de busca
+
+Se existem `n` produtos e cada produto pode ser escolhido ou não escolhido, existem:
+
+**2^n**
+
+soluções possíveis.
+
+Neste exemplo existem 10 produtos, portanto o espaço de busca possui:
+
+**2^10 = 1024 soluções possíveis.**
+
+Apesar de 1024 ser um número pequeno para este exemplo, o número cresce muito rapidamente. Com 50 produtos, por exemplo, seriam mais de 1 quatrilhão de possibilidades.
+
+#### Função objetivo
+
+A função objetivo é **maximizar a utilidade total dos produtos escolhidos**.
+
+Podemos representar isso por:
+
+**Maximizar:**
+
+`U(x) = Σ utilidade_i × x_i`
+
+em que `x_i` vale 1 quando o produto é escolhido e 0 quando não é.
+
+#### Restrições
+
+A principal restrição é que o valor total das compras não pode ultrapassar o orçamento disponível:
+
+`Σ preço_i × x_i ≤ orçamento`
+
+Além disso, cada produto só pode ser escolhido uma vez, representado pelo fato de `x_i` assumir apenas os valores 0 ou 1.
+
+Uma solução que ultrapassa o orçamento é considerada **inviável**.
+
+### 3. Classificação do problema
+
+Esse problema pode ser considerado **difícil**, pois é uma variação do conhecido **Problema da Mochila (Knapsack Problem)**, que é NP-difícil.
+
+A ideia é semelhante: temos vários itens, cada um com um custo e um valor, e precisamos escolher uma combinação que maximize o valor sem ultrapassar uma capacidade máxima.
+
+Para poucas opções é possível testar todas as soluções. Porém, como o espaço de busca cresce como `2^n`, testar todas as possibilidades se torna muito demorado quando a quantidade de produtos aumenta.
+
+Por exemplo:
+
+* 10 produtos → 1.024 soluções;
+* 20 produtos → 1.048.576 soluções;
+* 50 produtos → 1.125.899.906.842.624 soluções.
+
+Por isso, para problemas maiores podem ser utilizados métodos como programação dinâmica, algoritmos aproximados ou heurísticas.
+
+### 4. Conclusão
+
+A modelagem mostra como um problema simples do cotidiano pode ser transformado em um problema de otimização. Uma solução é uma seleção de produtos, o espaço de busca contém todas as combinações possíveis, a função objetivo procura maximizar a utilidade e a principal restrição é o orçamento disponível.
+
+O código desenvolvido gera uma solução aleatória, calcula seu custo e sua utilidade e verifica se ela respeita o orçamento. Dessa forma, ele demonstra na prática os principais conceitos de modelagem apresentados na atividade.
+
+Código: 
+import random
+
+# Dados dos produtos
+produtos = [
+    {"nome": "Arroz", "preco": 30, "utilidade": 10},
+    {"nome": "Feijão", "preco": 12, "utilidade": 8},
+    {"nome": "Carne", "preco": 80, "utilidade": 20},
+    {"nome": "Leite", "preco": 25, "utilidade": 12},
+    {"nome": "Frutas", "preco": 40, "utilidade": 15},
+    {"nome": "Verduras", "preco": 25, "utilidade": 13},
+    {"nome": "Café", "preco": 30, "utilidade": 11},
+    {"nome": "Biscoitos", "preco": 20, "utilidade": 6},
+    {"nome": "Produtos de limpeza", "preco": 60, "utilidade": 14},
+    {"nome": "Higiene pessoal", "preco": 70, "utilidade": 18}
+]
+
+orcamento = 250
+
+
+# Gera uma solução aleatória
+def gerar_solucao():
+    solucao = []
+
+    for produto in produtos:
+        # 0 = não escolher
+        # 1 = escolher
+        solucao.append(random.randint(0, 1))
+
+    return solucao
+
+
+# Calcula o custo total
+def calcular_custo(solucao):
+    custo = 0
+
+    for i in range(len(produtos)):
+        if solucao[i] == 1:
+            custo += produtos[i]["preco"]
+
+    return custo
+
+
+# Calcula a utilidade total
+def calcular_utilidade(solucao):
+    utilidade = 0
+
+    for i in range(len(produtos)):
+        if solucao[i] == 1:
+            utilidade += produtos[i]["utilidade"]
+
+    return utilidade
+
+
+# Verifica se a solução respeita as restrições
+def verificar_solucao(solucao):
+    custo = calcular_custo(solucao)
+
+    # A única restrição principal é não ultrapassar o orçamento
+    return custo <= orcamento
+
+
+# Programa principal
+solucao = gerar_solucao()
+
+custo = calcular_custo(solucao)
+utilidade = calcular_utilidade(solucao)
+factivel = verificar_solucao(solucao)
+
+print("=== LISTA DE COMPRAS ===")
+print()
+
+print("Solução gerada:")
+for i in range(len(produtos)):
+    if solucao[i] == 1:
+        print(f"- {produtos[i]['nome']} "
+              f"(R$ {produtos[i]['preco']:.2f}, "
+              f"utilidade {produtos[i]['utilidade']})")
+
+print()
+print(f"Orçamento: R$ {orcamento:.2f}")
+print(f"Custo total: R$ {custo:.2f}")
+print(f"Utilidade total: {utilidade}")
+
+if factivel:
+    print("Solução factível: SIM")
+    print("A solução respeita o orçamento.")
+else:
+    print("Solução factível: NÃO")
+    print("A solução ultrapassa o orçamento.")
